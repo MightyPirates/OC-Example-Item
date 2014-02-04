@@ -4,7 +4,7 @@ This is an example mod, demonstrating how to implement an item driver that allow
 
 The example item will allow spawning particle effects. When placed in a computer's card slot, it can be accessed as a component named "particle":
 ```
-lua> for i = 1, 100 do component.particle.spawn("flame", 0, 2, 0") end
+lua> for i = 1, 100 do component.particle.spawn("flame", 0, 2, 0) end
 ```
 
 Feel free to submit pull requests to expand and/or clarify documentation!
