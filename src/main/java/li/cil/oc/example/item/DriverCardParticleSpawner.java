@@ -1,18 +1,13 @@
 package li.cil.oc.example.item;
 
-import cpw.mods.fml.common.network.PacketDispatcher;
 import li.cil.oc.api.Network;
 import li.cil.oc.api.driver.Slot;
 import li.cil.oc.api.network.*;
 import li.cil.oc.api.prefab.DriverItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.Packet63WorldParticles;
 import net.minecraft.tileentity.TileEntity;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import java.util.Random;
 
 public class DriverCardParticleSpawner extends DriverItem {
     protected DriverCardParticleSpawner() {
@@ -71,44 +66,13 @@ public class DriverCardParticleSpawner extends DriverItem {
                 return new Object[]{false, "name too long"};
             }
 
+            Random rng = container.getWorldObj().rand;
             double x = container.xCoord + 0.5 + args.checkDouble(1);
             double y = container.yCoord + 0.5 + args.checkDouble(2);
             double z = container.zCoord + 0.5 + args.checkDouble(3);
-            double velocity = args.count() > 4 ? args.checkDouble(4) : (container.getWorldObj().rand.nextGaussian() * 0.1);
-
-            Packet63WorldParticles packet = createParticlePacket(name, (float) x, (float) y, (float) z, (float) velocity);
-            if (packet != null) {
-                PacketDispatcher.sendPacketToAllAround(container.xCoord + 0.5, container.yCoord + 0.5, container.zCoord + 0.5, 64, container.getWorldObj().getWorldInfo().getVanillaDimension(), packet);
-                return new Object[]{true};
-            } else return new Object[]{false};
-        }
-    }
-
-    // Utility stuff.
-
-    protected static Packet63WorldParticles createParticlePacket(String name, float x, float y, float z, float velocity) {
-        try {
-            // Is there a cleaner way to trigger particle spawns on the client
-            // from the server? I don't know, but this works, so whatever.
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            DataOutputStream dos = new DataOutputStream(bos);
-            dos.writeShort(name.length());
-            dos.writeChars(name);
-            dos.writeFloat(x);
-            dos.writeFloat(y);
-            dos.writeFloat(z);
-            dos.writeFloat(0f);
-            dos.writeFloat(0f);
-            dos.writeFloat(0f);
-            dos.writeFloat(velocity);
-            dos.writeInt(1);
-            ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-            DataInputStream dis = new DataInputStream(bis);
-            Packet63WorldParticles packet = new Packet63WorldParticles();
-            packet.readPacketData(dis);
-            return packet;
-        } catch (Throwable e) {
-            return null;
+            double velocity = args.count() > 4 ? args.checkDouble(4) : (container.getWorldObj().rand.nextDouble() * 0.1);
+            ModExampleItem.sendParticlePacket(name, container.getWorldObj().provider.dimensionId, x, y, z, velocity * rng.nextGaussian(), velocity * rng.nextGaussian(), velocity * rng.nextGaussian());
+            return new Object[]{true};
         }
     }
 }
