@@ -2,7 +2,7 @@ package li.cil.oc.example.item;
 
 import cpw.mods.fml.common.network.PacketDispatcher;
 import li.cil.oc.api.Network;
-import li.cil.oc.api.driver.Slot;
+import li.cil.oc.api.driver.*;
 import li.cil.oc.api.network.*;
 import li.cil.oc.api.prefab.DriverItem;
 import net.minecraft.item.ItemStack;
@@ -28,14 +28,14 @@ public class DriverCardParticleSpawner extends DriverItem {
     }
 
     @Override
-    public ManagedEnvironment createEnvironment(ItemStack stack, TileEntity container) {
+    public ManagedEnvironment createEnvironment(ItemStack stack, Container container) {
         return new Environment(container);
     }
 
     public class Environment extends li.cil.oc.api.prefab.ManagedEnvironment {
-        protected final TileEntity container;
+        protected final Container container;
 
-        public Environment(TileEntity container) {
+        public Environment(Container container) {
             this.container = container;
             node = Network.newNode(this, Visibility.Neighbors).
                     withComponent("particle").
@@ -71,14 +71,14 @@ public class DriverCardParticleSpawner extends DriverItem {
                 return new Object[]{false, "name too long"};
             }
 
-            double x = container.xCoord + 0.5 + args.checkDouble(1);
-            double y = container.yCoord + 0.5 + args.checkDouble(2);
-            double z = container.zCoord + 0.5 + args.checkDouble(3);
-            double velocity = args.count() > 4 ? args.checkDouble(4) : (container.getWorldObj().rand.nextGaussian() * 0.1);
+            double x = container.xPosition() + args.checkDouble(1);
+            double y = container.yPosition() + args.checkDouble(2);
+            double z = container.zPosition() + args.checkDouble(3);
+            double velocity = args.count() > 4 ? args.checkDouble(4) : (container.world().rand.nextGaussian() * 0.1);
 
             Packet63WorldParticles packet = createParticlePacket(name, (float) x, (float) y, (float) z, (float) velocity);
             if (packet != null) {
-                PacketDispatcher.sendPacketToAllAround(container.xCoord + 0.5, container.yCoord + 0.5, container.zCoord + 0.5, 64, container.getWorldObj().getWorldInfo().getVanillaDimension(), packet);
+                PacketDispatcher.sendPacketToAllAround(container.xPosition(), container.yPosition(), container.zPosition(), 64, container.world().getWorldInfo().getVanillaDimension(), packet);
                 return new Object[]{true};
             } else return new Object[]{false};
         }
