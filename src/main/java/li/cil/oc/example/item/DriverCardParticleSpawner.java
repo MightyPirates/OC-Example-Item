@@ -1,7 +1,7 @@
 package li.cil.oc.example.item;
 
 import li.cil.oc.api.Network;
-import li.cil.oc.api.driver.Slot;
+import li.cil.oc.api.driver.*;
 import li.cil.oc.api.network.*;
 import li.cil.oc.api.prefab.DriverItem;
 import net.minecraft.item.ItemStack;
@@ -23,14 +23,14 @@ public class DriverCardParticleSpawner extends DriverItem {
     }
 
     @Override
-    public ManagedEnvironment createEnvironment(ItemStack stack, TileEntity container) {
+    public ManagedEnvironment createEnvironment(ItemStack stack, Container container) {
         return new Environment(container);
     }
 
     public class Environment extends li.cil.oc.api.prefab.ManagedEnvironment {
-        protected final TileEntity container;
+        protected final Container container;
 
-        public Environment(TileEntity container) {
+        public Environment(Container container) {
             this.container = container;
             node = Network.newNode(this, Visibility.Neighbors).
                     withComponent("particle").
@@ -66,12 +66,12 @@ public class DriverCardParticleSpawner extends DriverItem {
                 return new Object[]{false, "name too long"};
             }
 
-            Random rng = container.getWorldObj().rand;
-            double x = container.xCoord + 0.5 + args.checkDouble(1);
-            double y = container.yCoord + 0.5 + args.checkDouble(2);
-            double z = container.zCoord + 0.5 + args.checkDouble(3);
-            double velocity = args.count() > 4 ? args.checkDouble(4) : (container.getWorldObj().rand.nextDouble() * 0.1);
-            ModExampleItem.sendParticlePacket(name, container.getWorldObj().provider.dimensionId, x, y, z, velocity * rng.nextGaussian(), velocity * rng.nextGaussian(), velocity * rng.nextGaussian());
+            Random rng = container.world().rand;
+            double x = container.xPosition() + args.checkDouble(1);
+            double y = container.yPosition() + args.checkDouble(2);
+            double z = container.zPosition() + args.checkDouble(3);
+            double velocity = args.count() > 4 ? args.checkDouble(4) : (container.world().rand.nextDouble() * 0.1);
+            ModExampleItem.sendParticlePacket(name, container.world().provider.dimensionId, x, y, z, velocity * rng.nextGaussian(), velocity * rng.nextGaussian(), velocity * rng.nextGaussian());
             return new Object[]{true};
         }
     }
