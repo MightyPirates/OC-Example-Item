@@ -1,8 +1,13 @@
 package li.cil.oc.example.item;
 
 import li.cil.oc.api.Network;
-import li.cil.oc.api.driver.*;
-import li.cil.oc.api.network.*;
+import li.cil.oc.api.driver.EnvironmentHost;
+import li.cil.oc.api.driver.item.Slot;
+import li.cil.oc.api.network.ManagedEnvironment;
+import li.cil.oc.api.network.Visibility;
+import li.cil.oc.api.machine.Arguments;
+import li.cil.oc.api.machine.Callback;
+import li.cil.oc.api.machine.Context;
 import li.cil.oc.api.prefab.DriverItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -18,23 +23,23 @@ public class DriverCardParticleSpawner extends DriverItem {
     // computers' card slots.
 
     @Override
-    public Slot slot(ItemStack stack) {
+    public String slot(ItemStack stack) {
         return Slot.Card;
     }
 
     @Override
-    public ManagedEnvironment createEnvironment(ItemStack stack, Container container) {
-        return new Environment(container);
+    public ManagedEnvironment createEnvironment(ItemStack stack, EnvironmentHost host) {
+        return new Environment(host);
     }
 
     public class Environment extends li.cil.oc.api.prefab.ManagedEnvironment {
-        protected final Container container;
+        protected final EnvironmentHost host;
 
-        public Environment(Container container) {
-            this.container = container;
-            node = Network.newNode(this, Visibility.Neighbors).
+        public Environment(EnvironmentHost host) {
+            this.host = host;
+            setNode(Network.newNode(this, Visibility.Neighbors).
                     withComponent("particle").
-                    create();
+                    create());
         }
 
         // We allow spawning particle effects. The parameters are the particle
@@ -66,12 +71,12 @@ public class DriverCardParticleSpawner extends DriverItem {
                 return new Object[]{false, "name too long"};
             }
 
-            Random rng = container.world().rand;
-            double x = container.xPosition() + args.checkDouble(1);
-            double y = container.yPosition() + args.checkDouble(2);
-            double z = container.zPosition() + args.checkDouble(3);
-            double velocity = args.count() > 4 ? args.checkDouble(4) : (container.world().rand.nextDouble() * 0.1);
-            ModExampleItem.sendParticlePacket(name, container.world().provider.dimensionId, x, y, z, velocity * rng.nextGaussian(), velocity * rng.nextGaussian(), velocity * rng.nextGaussian());
+            Random rng = host.world().rand;
+            double x = host.xPosition() + args.checkDouble(1);
+            double y = host.yPosition() + args.checkDouble(2);
+            double z = host.zPosition() + args.checkDouble(3);
+            double velocity = args.count() > 4 ? args.checkDouble(4) : (host.world().rand.nextDouble() * 0.1);
+            ModExampleItem.sendParticlePacket(name, host.world().provider.dimensionId, x, y, z, velocity * rng.nextGaussian(), velocity * rng.nextGaussian(), velocity * rng.nextGaussian());
             return new Object[]{true};
         }
     }
